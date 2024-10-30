@@ -14,6 +14,15 @@
 #include <stdbool.h>
 
 /** Opaque definition of type Token and ptrToken*/
+typedef enum t_Token {number, binary_operator, parenthesis} TokenType;
+
+struct s_Token {
+	TokenType type;
+	union {
+		float number;
+		char symbol;
+	} value;
+};
 typedef struct s_Token Token;
 typedef Token* ptrToken;
 

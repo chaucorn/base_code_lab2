@@ -15,13 +15,14 @@
 typedef struct s_internalQueue {
 	const void* value;
 	struct s_internalQueue* next;
-} InternalQueue;
+} InternalQueue; // struct of node in queue, have pointer to value (ex: Token), 
+				// and pointer to the next node (Internal Queue)
 
 struct s_queue{
 	InternalQueue* head;
 	InternalQueue* tail;
 	unsigned int size;
-};
+}; // = Queue, point to the beginning of a queue
 
 Queue* create_queue(void){
 	Queue* q = calloc(1, sizeof(Queue));
@@ -29,7 +30,7 @@ Queue* create_queue(void){
 }
 
 void delete_queue(ptrQueue *q) {
-	InternalQueue* toDelete = (*q)->head;
+	InternalQueue* toDelete = (*q)->head; //accessing head field in a Queue struct 
 	while (toDelete) {
 		InternalQueue* f = toDelete;
 		toDelete = toDelete->next;
@@ -40,11 +41,13 @@ void delete_queue(ptrQueue *q) {
 }
 
 Queue* queue_push(Queue* q, const void* v){
+	//potential memory leak
 	InternalQueue* new = calloc(1, sizeof(InternalQueue));
 	new->value = v;
 	InternalQueue** insert_at = (q->size ? &(q->tail->next) : &(q->head));
 	*insert_at = new;
 	q->tail = new;
+	//free(new); // I added this line
 	++(q->size);
 	return (q);
 }

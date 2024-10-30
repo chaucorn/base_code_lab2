@@ -7,6 +7,7 @@
 
 
 /* Enum type that defines the token type */
+/*
 typedef enum t_Token {number, binary_operator, parenthesis} TokenType;
 
 struct s_Token {
@@ -16,7 +17,7 @@ struct s_Token {
 		char symbol;
 	} value;
 };
-
+*/
 Token* create_token_from_string(const char* s, int lg) {
 	(void)lg;
 	Token* t = malloc(sizeof(Token));

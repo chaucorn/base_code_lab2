@@ -37,7 +37,7 @@ Queue* queue_push(Queue* q, const void* v);
 */
 Queue* queue_pop(Queue* q);
 
-/** Operator : acces to the frist element of the queue
+/** Operator : acces to the first element of the queue
 	queue_top : Queue -> int
 	@pre !queue_empty(q)
 */
