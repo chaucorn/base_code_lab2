@@ -29,6 +29,8 @@ Queue* shuntingYard(Queue* infix);
 bool isSymbol(char c);
 bool is_condition_correct_case_operator(const Token*oper1, const Token*oper2);
 Queue* stringToTokenQueue(const char* expression);
+Token* evaluateOperator(Token* arg1, Token* op, Token* arg2);
+float evaluateExpression(Queue* postfix);
 /** Main function for testing.
  * The main function expects one parameter that is the file where expressions to translate are
  * to be read.
@@ -53,6 +55,65 @@ int main(int argc, char** argv){
 
 	fclose(input);
 	return 0;
+}
+
+float evaluateExpression(Queue* postfix){
+	unsigned int my_size = queue_size(postfix);
+	Stack* resultStack = create_stack(my_size);
+	Token* operand_2 = NULL;
+	Token* operand_1 = NULL;
+	Token* result = NULL;
+	while(!queue_empty(postfix)){
+		Token* t = (Token*) queue_top(postfix);
+		if (token_is_number(t)){
+			stack_push(resultStack, t);
+		}
+		else{
+			operand_2 = (Token*) stack_top(resultStack);
+			stack_pop(resultStack);
+			operand_1 = (Token*) stack_top(resultStack);
+			stack_pop(resultStack);
+			result = evaluateOperator(operand_1, t, operand_2);
+			stack_push(resultStack, result);
+		}
+		queue_pop(postfix);
+		
+	}
+	float evaluation = token_value(stack_top(resultStack));
+	delete_stack(&resultStack);
+	delete_token(&operand_1);
+	delete_token(&operand_2);
+	delete_token(&result);
+	return evaluation;
+}
+
+Token* evaluateOperator(Token* arg1, Token* op, Token* arg2){
+	float result = 0.0f; 
+	float a = token_value(arg1);
+	float b = token_value(arg2);
+	switch (token_operator(op))
+	{
+	case '+':
+		result = a + b;
+		break;
+	case '-':
+		result = a - b;
+		break;
+	case '*':
+		result = a * b;
+		break;
+	case '/':
+		result = a / b;
+		break;
+	case '^':
+		result = (float) pow(a,b);
+		break;
+	default:
+		fprintf(stderr,"Warning: Unsupported operator '%c'\n", token_operator(op));
+		exit(3);
+	}
+	Token* total = create_token_from_value(result);
+	return total;
 }
 
 bool is_condition_correct_case_operator(const Token*oper1, const Token*oper2){
@@ -81,18 +142,6 @@ Queue* shuntingYard(Queue* infix){
 			continue;
 		}
 		if (token_is_operator(t)){
-			/*while (
-			- firstCondition
-            there is an operator o2 at the top of the operator stack which is not a left parenthesis, 
-            AND 
-			- secondCondition
-			(o2 has greater precedence than o1 OR (o1 and o2 have the same precedence and o1 is left-associative))
-			): 
-				pop o2 from the operator stack into the output queue
-
-			push o1 onto the operator stack
-			*/
-			
 			if (stack_empty(operatorStack))
 			{
 				stack_push(operatorStack, t);
@@ -101,15 +150,12 @@ Queue* shuntingYard(Queue* infix){
 			}
 			else{
 				const Token* o2 = stack_top(operatorStack);
-				
-				bool is_condition_true = is_condition_correct_case_operator(t, o2);
-				while (is_condition_true)
+				while (is_condition_correct_case_operator(t, o2))
 				{
 					//pop o2 from the operator stack into the output queue
 					queue_push(postfix, o2);
 					stack_pop(operatorStack);
 					o2 = stack_top(operatorStack);
-					is_condition_true = is_condition_correct_case_operator(t, o2);
 				}
 				stack_push(operatorStack, t);
 				queue_pop(infix);
@@ -121,15 +167,7 @@ Queue* shuntingYard(Queue* infix){
 			queue_pop(infix);
 			continue;
 			}
-
 		if (token_is_parenthesis(t) && (token_parenthesis(t) == ')')){
-		
-        //while the operator at the top of the operator stack is not a left parenthesis:
-             //{assert the operator stack is not empty}
-            /* If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. */
-                 //pop the operator from the operator stack into the output queue
-        //{assert there is a left parenthesis at the top of the operator stack}
-            //pop the left parenthesis from the operator stack and discard it
 			while (!stack_empty(operatorStack)){
 				const Token* operatorStack_top = stack_top(operatorStack);
 				if ((token_is_operator(operatorStack_top))||(token_is_parenthesis(operatorStack_top)&&(token_parenthesis(operatorStack_top) != '('))){
@@ -141,7 +179,6 @@ Queue* shuntingYard(Queue* infix){
 			}
 			if (stack_empty(operatorStack))
 			{
-				
 				fprintf(stderr, "There are a mismatched parenthesis! \n");
 				exit(1);
 			}
@@ -154,8 +191,7 @@ Queue* shuntingYard(Queue* infix){
 				
 				fprintf(stderr, "mismatched\n");
 				exit(2);
-			}
-			
+			}	
 		}	
 		}
 	while (!stack_empty(operatorStack)){
@@ -171,7 +207,6 @@ Queue* shuntingYard(Queue* infix){
 }
 	
 
-
 Queue* stringToTokenQueue(const char* expression){
 	//Queue contient le resultat
 	Queue* q = create_queue();
@@ -183,7 +218,6 @@ Queue* stringToTokenQueue(const char* expression){
 			curpos +=1;
 			continue;
 		}
-
 		if(isdigit(*curpos)){
 			int nb_digit = 1;
 			const char* curpos_copy = curpos + 1;
@@ -195,10 +229,7 @@ Queue* stringToTokenQueue(const char* expression){
 				nb_digit += 1;
 				curpos_copy += 1;
 			}
-			// Calculate the value:
-			//atof return a double
-			float v = (float) atof(curpos);
-			//printf("v = %f\n", v);
+			float v = (float) atof(curpos); //atof return a double
 			curpos+=nb_digit;
 			Token *t = create_token_from_value(v);
 			queue_push(q, t);
@@ -234,6 +265,7 @@ void computeExpressions(FILE* input) {
 		print_queue(stdout, my_postfix);
 		printf("\n\n");
 
+		printf("Evaluate: %f\n", evaluateExpression(my_postfix));
 		// free 
 		ptrQueue* q = &my_infix;
 		delete_queue(q);
