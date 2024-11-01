@@ -239,6 +239,7 @@ Queue* stringToTokenQueue(const char* expression){
 			Token *t = create_token_from_string(curpos, 1);
 			queue_push(q, t);
 			curpos +=1;
+		
 		}
 	}
 
@@ -259,18 +260,16 @@ void computeExpressions(FILE* input) {
 		Queue *my_infix = stringToTokenQueue(line);
 		print_queue(stdout, my_infix);
 		printf("\n");
-		Queue* my_postfix = shuntingYard(my_infix);
 
+		Queue* my_postfix = shuntingYard(my_infix);
 		printf("Postfix: ");
 		print_queue(stdout, my_postfix);
 		printf("\n\n");
 
-		printf("Evaluate: %f\n", evaluateExpression(my_postfix));
+		//printf("Evaluate: %f\n", evaluateExpression(my_postfix));
 		// free
-		ptrQueue* q = &my_infix;
-		delete_queue(q);
-		ptrQueue* q_post = &my_postfix;
-		delete_queue(q_post);
+		delete_queue(&my_infix);
+		//delete_queue(&my_postfix);
 	}
 	free(line);
 	return;

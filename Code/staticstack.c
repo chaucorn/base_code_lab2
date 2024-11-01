@@ -30,6 +30,7 @@ Stack* create_stack(int max_size) {
 }
 
 void delete_stack(ptrStack* s) {
+	free((*s)->stack);
 	free (*s);
 	*s = NULL;
 }

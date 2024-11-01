@@ -10,6 +10,7 @@
 #include "queue.h"
 #include <assert.h>
 #include <stdlib.h>
+#include "token.h"
 
 /* Full definition of the queue structure */
 typedef struct s_internalQueue {
@@ -39,6 +40,20 @@ void delete_queue(ptrQueue *q) {
 	free(*q);
 	*q = NULL;
 }
+
+void delete_token_queue(ptrQueue *q) {
+	InternalQueue* toDelete = (*q)->head; //accessing head field in a Queue struct 
+	while (toDelete) {
+		InternalQueue* f = toDelete;
+		free((void* ) f->value);
+		toDelete = toDelete->next;
+		free (f);
+	}
+	free(*q);
+	//*q = NULL;
+}
+
+
 
 Queue* queue_push(Queue* q, const void* v){
 	//potential memory leak

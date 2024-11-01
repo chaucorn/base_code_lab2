@@ -16,6 +16,7 @@
 typedef struct s_queue Queue;
 typedef Queue* ptrQueue;
 
+
 /** Constructor : build an empty queue 
 	queue : -> Queue
 */
