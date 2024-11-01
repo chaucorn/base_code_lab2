@@ -15,13 +15,13 @@
 
 
 
-/** 
+/**
  * Utilities function to print the token queues
  */
 void print_token(const void* e, void* user_param);
 void print_queue(FILE* f, Queue* q);
 
-/** 
+/**
  * Function to be written by students
  */
 void computeExpressions(FILE* input);
@@ -43,7 +43,7 @@ int main(int argc, char** argv){
 		fprintf(stderr,"usage : %s filename\n", argv[0]);
 		return 1;
 	}
-	
+
 	FILE* input = fopen(argv[1], "r");
 
 	if ( !input ) {
@@ -60,8 +60,6 @@ int main(int argc, char** argv){
 float evaluateExpression(Queue* postfix){
 	unsigned int my_size = queue_size(postfix);
 	Stack* resultStack = create_stack(my_size);
-	Token* operand_2 = NULL;
-	Token* operand_1 = NULL;
 	Token* result = NULL;
 	while(!queue_empty(postfix)){
 		Token* t = (Token*) queue_top(postfix);
@@ -69,26 +67,28 @@ float evaluateExpression(Queue* postfix){
 			stack_push(resultStack, t);
 		}
 		else{
-			operand_2 = (Token*) stack_top(resultStack);
+			Token* operand_2 = (Token*) stack_top(resultStack);
 			stack_pop(resultStack);
-			operand_1 = (Token*) stack_top(resultStack);
+			Token* operand_1 = (Token*) stack_top(resultStack);
 			stack_pop(resultStack);
 			result = evaluateOperator(operand_1, t, operand_2);
 			stack_push(resultStack, result);
+			delete_token(&operand_1);
+			delete_token(&operand_2);
 		}
+		//delete_token(&t);
 		queue_pop(postfix);
-		
+
 	}
 	float evaluation = token_value(stack_top(resultStack));
 	delete_stack(&resultStack);
-	delete_token(&operand_1);
-	delete_token(&operand_2);
+
 	delete_token(&result);
 	return evaluation;
 }
 
 Token* evaluateOperator(Token* arg1, Token* op, Token* arg2){
-	float result = 0.0f; 
+	float result = 0.0f;
 	float a = token_value(arg1);
 	float b = token_value(arg2);
 	switch (token_operator(op))
@@ -188,11 +188,11 @@ Queue* shuntingYard(Queue* infix){
 				queue_pop(infix);
 				continue;
 			}else{
-				
+
 				fprintf(stderr, "mismatched\n");
 				exit(2);
-			}	
-		}	
+			}
+		}
 		}
 	while (!stack_empty(operatorStack)){
 		if (token_is_parenthesis(stack_top(operatorStack))){
@@ -205,14 +205,14 @@ Queue* shuntingYard(Queue* infix){
 	delete_stack(&operatorStack);
 	return postfix;
 }
-	
+
 
 Queue* stringToTokenQueue(const char* expression){
 	//Queue contient le resultat
 	Queue* q = create_queue();
 	const char* curpos = expression;
 
-	
+
 	while(*curpos != '\0'){
 		if(*curpos == ' ' || *curpos == '\n'){
 			curpos +=1;
@@ -222,10 +222,10 @@ Queue* stringToTokenQueue(const char* expression){
 			int nb_digit = 1;
 			const char* curpos_copy = curpos + 1;
 			// Calculate the digit number
-			
+
 			while (isdigit(*curpos_copy))
 			{
-				
+
 				nb_digit += 1;
 				curpos_copy += 1;
 			}
@@ -235,23 +235,23 @@ Queue* stringToTokenQueue(const char* expression){
 			queue_push(q, t);
 		}
 		if (isSymbol(*curpos)){
-			
+
 			Token *t = create_token_from_string(curpos, 1);
 			queue_push(q, t);
 			curpos +=1;
-		}	
+		}
 	}
-	
+
 	return q;
 
 }
 void computeExpressions(FILE* input) {
 	size_t buffer_size = 0;
 	char* line = NULL;
-	 
-	// getline can automatically allocate memory 
+
+	// getline can automatically allocate memory
 	//size_t buffer_size = 512;
-	
+
 	//line = (char*) malloc(buffer_size*sizeof(char));
 	while(getline(&line, &buffer_size, input) != -1){
 		printf("Input: %s", line);
@@ -260,13 +260,13 @@ void computeExpressions(FILE* input) {
 		print_queue(stdout, my_infix);
 		printf("\n");
 		Queue* my_postfix = shuntingYard(my_infix);
-		
+
 		printf("Postfix: ");
 		print_queue(stdout, my_postfix);
 		printf("\n\n");
 
 		printf("Evaluate: %f\n", evaluateExpression(my_postfix));
-		// free 
+		// free
 		ptrQueue* q = &my_infix;
 		delete_queue(q);
 		ptrQueue* q_post = &my_postfix;
@@ -274,10 +274,10 @@ void computeExpressions(FILE* input) {
 	}
 	free(line);
 	return;
-	
+
 }
 bool isSymbol(char c) {
-    return (c == '+' || c == '-' || c == '*' || c == '/' || 
+    return (c == '+' || c == '-' || c == '*' || c == '/' ||
             c == '^' || c == '(' || c == ')');
 }
 
