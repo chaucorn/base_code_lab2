@@ -62,8 +62,8 @@ float evaluateExpression(Queue* postfix){
 	Stack* resultStack = create_stack(my_size);
 	Token* result = NULL;
 	while(!queue_empty(postfix)){
-		Token* t = (Token*) queue_top(postfix);
-		if (token_is_number(t)){
+		Token* t = (void*) queue_top(postfix);
+		if (token_is_number(queue_top(postfix))){
 			stack_push(resultStack, t);
 		}
 		else{
@@ -72,11 +72,14 @@ float evaluateExpression(Queue* postfix){
 			Token* operand_1 = (Token*) stack_top(resultStack);
 			stack_pop(resultStack);
 			result = evaluateOperator(operand_1, t, operand_2);
-			stack_push(resultStack, result);
+			stack_push(resultStack, result );
+			//delete_token(&result);
 			delete_token(&operand_1);
 			delete_token(&operand_2);
+			delete_token(&t);
 		}
 		//delete_token(&t);
+
 		queue_pop(postfix);
 
 	}
@@ -163,11 +166,13 @@ Queue* shuntingYard(Queue* infix){
 			}
 			}
 		if (token_is_parenthesis(t) && (token_parenthesis(t) == '(')){
+
 			stack_push(operatorStack, t);
 			queue_pop(infix);
 			continue;
 			}
 		if (token_is_parenthesis(t) && (token_parenthesis(t) == ')')){
+
 			while (!stack_empty(operatorStack)){
 				const Token* operatorStack_top = stack_top(operatorStack);
 				if ((token_is_operator(operatorStack_top))||(token_is_parenthesis(operatorStack_top)&&(token_parenthesis(operatorStack_top) != '('))){
@@ -184,7 +189,11 @@ Queue* shuntingYard(Queue* infix){
 			}
 			const Token* operatorStack_top = stack_top(operatorStack);
 			if(token_parenthesis(operatorStack_top) == '('){
+				Token* temp_paren = (void*)stack_top(operatorStack);
+				delete_token(&temp_paren);
 				stack_pop(operatorStack);
+				Token* temp_queue_top = (void*)queue_top(infix);
+				delete_token(&temp_queue_top);
 				queue_pop(infix);
 				continue;
 			}else{
@@ -192,6 +201,7 @@ Queue* shuntingYard(Queue* infix){
 				fprintf(stderr, "mismatched\n");
 				exit(2);
 			}
+
 		}
 		}
 	while (!stack_empty(operatorStack)){
@@ -206,13 +216,10 @@ Queue* shuntingYard(Queue* infix){
 	return postfix;
 }
 
-
 Queue* stringToTokenQueue(const char* expression){
 	//Queue contient le resultat
 	Queue* q = create_queue();
 	const char* curpos = expression;
-
-
 	while(*curpos != '\0'){
 		if(*curpos == ' ' || *curpos == '\n'){
 			curpos +=1;
@@ -239,21 +246,16 @@ Queue* stringToTokenQueue(const char* expression){
 			Token *t = create_token_from_string(curpos, 1);
 			queue_push(q, t);
 			curpos +=1;
-		
+
 		}
 	}
-
 	return q;
-
 }
 void computeExpressions(FILE* input) {
 	size_t buffer_size = 0;
 	char* line = NULL;
 
 	// getline can automatically allocate memory
-	//size_t buffer_size = 512;
-
-	//line = (char*) malloc(buffer_size*sizeof(char));
 	while(getline(&line, &buffer_size, input) != -1){
 		printf("Input: %s", line);
 		printf("Infix: ");
@@ -266,10 +268,10 @@ void computeExpressions(FILE* input) {
 		print_queue(stdout, my_postfix);
 		printf("\n\n");
 
-		//printf("Evaluate: %f\n", evaluateExpression(my_postfix));
+		printf("Evaluate: %f\n", evaluateExpression(my_postfix));
 		// free
 		delete_queue(&my_infix);
-		//delete_queue(&my_postfix);
+		delete_queue(&my_postfix);
 	}
 	free(line);
 	return;

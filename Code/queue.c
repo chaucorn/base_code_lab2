@@ -2,9 +2,9 @@
 /*
  Licence Informatique - Structures de données
  Mathias Paulin (Mathias.Paulin@irit.fr)
- 
+
  Implantation du TAD Queue étudié en cours.
- 
+
  */
 /*-----------------------------------------------------------------*/
 #include "queue.h"
@@ -16,7 +16,7 @@
 typedef struct s_internalQueue {
 	const void* value;
 	struct s_internalQueue* next;
-} InternalQueue; // struct of node in queue, have pointer to value (ex: Token), 
+} InternalQueue; // struct of node in queue, have pointer to value (ex: Token),
 				// and pointer to the next node (Internal Queue)
 
 struct s_queue{
@@ -31,9 +31,10 @@ Queue* create_queue(void){
 }
 
 void delete_queue(ptrQueue *q) {
-	InternalQueue* toDelete = (*q)->head; //accessing head field in a Queue struct 
+	InternalQueue* toDelete = (*q)->head; //accessing head field in a Queue struct
 	while (toDelete) {
 		InternalQueue* f = toDelete;
+		free((void* ) f->value); // add line to free structure inside InternalQueue->value
 		toDelete = toDelete->next;
 		free (f);
 	}
@@ -41,17 +42,6 @@ void delete_queue(ptrQueue *q) {
 	*q = NULL;
 }
 
-void delete_token_queue(ptrQueue *q) {
-	InternalQueue* toDelete = (*q)->head; //accessing head field in a Queue struct 
-	while (toDelete) {
-		InternalQueue* f = toDelete;
-		free((void* ) f->value);
-		toDelete = toDelete->next;
-		free (f);
-	}
-	free(*q);
-	//*q = NULL;
-}
 
 
 
@@ -70,6 +60,7 @@ Queue* queue_push(Queue* q, const void* v){
 Queue* queue_pop(Queue* q){
 	assert (!queue_empty(q));
 	InternalQueue* old = q->head;
+
 	q->head = q->head->next;
 	--(q->size);
 	free (old);

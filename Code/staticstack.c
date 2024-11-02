@@ -2,14 +2,15 @@
 /*
  Licence Informatique - Structures de données
  Mathias Paulin (Mathias.Paulin@irit.fr)
- 
+
  Implantation du TAD Stack étudié en cours.
- 
+
  */
 /*-----------------------------------------------------------------*/
 #include "stack.h"
 #include <assert.h>
 #include <stdlib.h>
+#include "token.h"
 #define STACK_SIZE 4
 
 /* Full definition of the s_stack structure */
@@ -30,8 +31,8 @@ Stack* create_stack(int max_size) {
 }
 
 void delete_stack(ptrStack* s) {
-	free((*s)->stack);
 	free (*s);
+	//free((*s)->stack);
 	*s = NULL;
 }
 
